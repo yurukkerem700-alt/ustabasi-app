@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ustabaşı V18</title>
+
+<style>
+body{margin:0;font-family:system-ui;background:#f6f7fb;color:#111827}
+.top{background:#111827;color:#fff;padding:14px;font-weight:700;display:flex;justify-content:space-between}
+
+.container{width:92%;max-width:1100px;margin:auto}
+
+.card{
+background:#fff;
+padding:15px;
+margin-top:12px;
+border-radius:12px;
+box-shadow:0 6px 18px rgba(0,0,0,0.06);
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin-top:8px;
+border:1px solid #ddd;
+border-radius:8px;
+}
+
+button{
+width:100%;
+padding:10px;
+margin-top:8px;
+border:none;
+border-radius:8px;
+background:#f97316;
+color:#fff;
+font-weight:700;
+cursor:pointer;
+}
+
+.job{
+padding:10px;
+border:1px solid #eee;
+border-radius:10px;
+margin-top:8px;
+}
+
+.chatBox{
+height:200px;
+overflow:auto;
+background:#f9fafb;
+padding:10px;
+border-radius:8px;
+font-size:13px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="top">
+<div>USTABAŞI V18</div>
+<div id="userBox"></div>
+</div>
+
+<div class="container">
+
+<!-- USER -->
+<div class="card">
+<h3>Giriş</h3>
+<input id="name" placeholder="Ad">
+<select id="role">
+<option value="worker">Usta</option>
+<option value="owner">İşveren</option>
+</select>
+<button onclick="login()">Giriş</button>
+</div>
+
+<!-- CHAT -->
+<div class="card">
+<h3>Mesajlaşma</h3>
+
+<input id="receiver" placeholder="Alıcı adı">
+<textarea id="msg" placeholder="Mesaj"></textarea>
+
+<button onclick="send()">Gönder</button>
+
+<button onclick="loadChat()">Sohbeti Aç</button>
+
+<div class="chatBox" id="chat"></div>
+</div>
+
+<!-- JOBS -->
+<div class="card">
+<h3>İlanlar</h3>
+<div id="jobs"></div>
+</div>
+
+</div>
+
+<script>
+
+let user = JSON.parse(localStorage.getItem("user"));
+
+function update(){
+document.getElementById("userBox").innerText =
+user ? user.name : "Giriş yok";
+}
+
+async function login(){
+
+let name=document.getElementById("name").value;
+let role=document.getElementById("role").value;
+
+user={name,role};
+localStorage.setItem("user",JSON.stringify(user));
+
+await fetch("http://localhost:3000/api/users",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(user)
+});
+
+update();
+loadJobs();
+}
+
+/* CHAT */
+async function send(){
+
+await fetch("http://localhost:3000/api/message",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+sender:user.name,
+receiver:document.getElementById("receiver").value,
+text:document.getElementById("msg").value
+})
+});
+
+loadChat();
+}
+
+async function loadChat(){
+
+let r=document.getElementById("receiver").value;
+
+let res=await fetch(`http://localhost:3000/api/messages/${user.name}/${r}`);
+let data=await res.json();
+
+document.getElementById("chat").innerHTML =
+data.map(m=>`<div><b>${m.sender}:</b> ${m.text}</div>`).join("");
+}
+
+/* JOBS */
+async function loadJobs(){
+
+let res=await fetch("http://localhost:3000/api/jobs");
+let data=await res.json();
+
+document.getElementById("jobs").innerHTML =
+data.map(j=>`
+<div class="job">
+<b>${j.title}</b><br>
+${j.location}
+</div>
+`).join("");
+}
+
+update();
+loadJobs();
+
+</script>
+
+</body>
+</html>
