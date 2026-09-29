@@ -117,7 +117,7 @@ let role=document.getElementById("role").value;
 user={name,role};
 localStorage.setItem("user",JSON.stringify(user));
 
-await fetch("http://localhost:3000/api/users",{
+await fetch("/api/users",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify(user)
@@ -130,7 +130,7 @@ loadJobs();
 /* CHAT */
 async function send(){
 
-await fetch("http://localhost:3000/api/message",{
+await fetch("/api/message",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
@@ -147,7 +147,7 @@ async function loadChat(){
 
 let r=document.getElementById("receiver").value;
 
-let res=await fetch(`http://localhost:3000/api/messages/${user.name}/${r}`);
+let res=await fetch(`/api/messages/${user.name}/${r}`);
 let data=await res.json();
 
 document.getElementById("chat").innerHTML =
@@ -157,7 +157,7 @@ data.map(m=>`<div><b>${m.sender}:</b> ${m.text}</div>`).join("");
 /* JOBS */
 async function loadJobs(){
 
-let res=await fetch("http://localhost:3000/api/jobs");
+let res=await fetch("/api/jobs");
 let data=await res.json();
 
 document.getElementById("jobs").innerHTML =
