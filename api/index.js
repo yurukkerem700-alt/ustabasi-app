@@ -22,7 +22,7 @@ async function body(req) {
   });
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const url = new URL(req.url || "/", "http://localhost");
   const parts = url.pathname.replace(/^\/api\/?/, "").split("/").filter(Boolean);
   const route = parts[0] || "";
